@@ -87,6 +87,8 @@ esp32_fft_config_t *esp32_fft_init(int size, esp32_fft_type_t type,
       config->input = (float *)malloc(config->size * sizeof(float));
     else if (config->type == ESP32_FFT_COMPLEX)
       config->input = (float *)malloc(2 * config->size * sizeof(float));
+    else
+      return NULL;
 
     config->flags |= ESP32_FFT_OWN_INPUT_MEM;
   }
@@ -102,6 +104,8 @@ esp32_fft_config_t *esp32_fft_init(int size, esp32_fft_type_t type,
       config->output = (float *)malloc(config->size * sizeof(float));
     else if (config->type == ESP32_FFT_COMPLEX)
       config->output = (float *)malloc(2 * config->size * sizeof(float));
+    else
+      return NULL;
 
     config->flags |= ESP32_FFT_OWN_OUTPUT_MEM;
   }
@@ -286,15 +290,11 @@ void esp32_fft_fft_primitive(float *x, float *y, int n, int stride,
    * ----------
    *  x (float *)
    *    The input array containing the complex samples with
-   *    real/imaginary parts interleaved [Re(x0), Im(x0), ..., Re(x_n-1), Im(x_n-1)]
-   *  y (float *)
-   *    The output array containing the complex samples with
-   *    real/imaginary parts interleaved [Re(x0), Im(x0), ..., Re(x_n-1), Im(x_n-1)]
-   *  n (int)
-   *    The FFT size, should be a power of 2
-   *  stride (int)
-   *    The number of elements to skip between two successive samples
-   *  tw_stride (int)
+   *    real/imaginary parts interleaved [Re(x0), Im(x0), ..., Re(x_n-1),
+   * Im(x_n-1)] y (float *) The output array containing the complex samples with
+   *    real/imaginary parts interleaved [Re(x0), Im(x0), ..., Re(x_n-1),
+   * Im(x_n-1)] n (int) The FFT size, should be a power of 2 stride (int) The
+   * number of elements to skip between two successive samples tw_stride (int)
    *    The number of elements to skip between two successive twiddle factors
    */
   int k;
