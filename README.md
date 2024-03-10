@@ -11,19 +11,19 @@ This code was written by [Robin Scheibler](http://www.robinscheibler.org) during
 Example
 -------
 
-    #include "fft.h"
+    #include "esp32_fft_fft.h"
 
     ...
 
     // Create the FFT config structure
-    fft_config_t *real_fft_plan = fft_init(NFFT, FFT_REAL, FFT_FORWARD, NULL, NULL);
+    fft_config_t *real_fft_plan = esp32_fft_init(NFFT, FFT_REAL, FFT_FORWARD, NULL, NULL);
 
     // Fill array with some data
     for (k = 0 ; k < fft_analysis->size ; k++)
       real_fft_plan->input[k] = (float)k;
 
     // Execute transformation
-    fft_execute(real_fft_plan);
+    esp32_fft_execute(real_fft_plan);
 
     // Now do something with the output
     printf("DC component : %f\n", real_fft_plan->output[0]);  // DC is at [0]
@@ -32,16 +32,16 @@ Example
     printf("Middle component : %f\n", real_fft_plan->output[1]);  // N/2 is real and stored at [1]
 
     // Don't forget to clean up at the end to free all the memory that was allocated
-    fft_destroy(real_fft_plan)
+    esp32_fft_destroy(real_fft_plan)
 
 
 Documentation
 -------------
 
 1. Create the FFT configuration by running 
-  `fft_init`.
+  `esp32_fft_init`.
         
-        fft_config_t *fft_init(int size, fft_type_t type, fft_direction_t direction, float *input, float *output)
+        fft_config_t *esp32_fft_init(int size, fft_type_t type, fft_direction_t direction, float *input, float *output)
 
         Parameters
         ----------
@@ -63,11 +63,11 @@ Documentation
 
 2. Fill data in the `input` buffer
 
-3. Call `fft_execute` to run the FFT
+3. Call `esp32_fft_execute` to run the FFT
 
 4. Use the transformed data located in the `output` buffer
 
-5. Possibly free up memory by calling `fft_destroy` on the configuration structure
+5. Possibly free up memory by calling `esp32_fft_destroy` on the configuration structure
 
 ### Note about Inverse Real FFT
 

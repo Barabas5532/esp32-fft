@@ -15,7 +15,7 @@
 #include "driver/timer.h"
 #include "soc/timer_group_struct.h"
 
-#include "fft.h"
+#include "esp32_fft.h"
 
 /* Can run 'make menuconfig' to choose the GPIO to blink,
    or you can edit the following line and set a number here.
@@ -59,7 +59,7 @@ void fft4_test_task() {
   float output[8];
   float gt[8] = {18., 21., 2., 9., -2., -3., 10., 5.};
 
-  fft4(input, 2, output, 2);
+  esp32_fft_fft4(input, 2, output, 2);
 
   printf("-----------\n");
   for (k = 0; k < 8; k += 2)
@@ -79,7 +79,7 @@ void fft8_test_task() {
       35.,  40., -2.41421356, 6., 5.00000000, 0., 17.24264069, 16.48528137,
       -17., -4., 0.41421356,  6., 9.00000000, 0., 8.75735931,  -0.48528137};
 
-  fft8(input, 2, output, 2);
+  esp32_fft_fft8(input, 2, output, 2);
 
   printf("-----------\n");
   for (k = 0; k < 16; k += 2)
@@ -98,10 +98,11 @@ void fft_test_task() {
     int NFFT = 1 << n;
 
     // Create fft plan and let it allocate arrays
-    fft_config_t *fft_analysis =
-        fft_init(NFFT, FFT_COMPLEX, FFT_FORWARD, NULL, NULL);
-    fft_config_t *fft_synthesis =
-        fft_init(NFFT, FFT_COMPLEX, FFT_BACKWARD, fft_analysis->output, NULL);
+    esp32_fft_config_t *fft_analysis =
+        esp32_fft_init(NFFT, ESP32_FFT_COMPLEX, ESP32_FFT_FORWARD, NULL, NULL);
+    esp32_fft_config_t *fft_synthesis =
+        esp32_fft_init(NFFT, ESP32_FFT_COMPLEX, ESP32_FFT_BACKWARD,
+                       fft_analysis->output, NULL);
 
     // Fill array with some dummy data
     for (k = 0; k < fft_analysis->size; k++) {
@@ -111,8 +112,8 @@ void fft_test_task() {
     }
 
     // Test accuracy
-    fft_execute(fft_analysis);
-    fft_execute(fft_synthesis);
+    esp32_fft_execute(fft_analysis);
+    esp32_fft_execute(fft_synthesis);
 
     int n_errors = 0;
     for (k = 0; k < 2 * fft_analysis->size; k++)
@@ -129,7 +130,7 @@ void fft_test_task() {
     timer_get_counter_time_sec(TIMER_GROUP_0, TIMER_0, &start);
     gpio_set_level(GPIO_OUTPUT, 1);
     for (k = 0; k < REP; k++)
-      fft_execute(fft_analysis);
+      esp32_fft_execute(fft_analysis);
     gpio_set_level(GPIO_OUTPUT, 0);
     timer_get_counter_time_sec(TIMER_GROUP_0, TIMER_0, &end);
     printf(" FFT size=%d runtime=%f ms\n", NFFT, 1000 * (end - start) / REP);
@@ -139,13 +140,13 @@ void fft_test_task() {
     timer_get_counter_time_sec(TIMER_GROUP_0, TIMER_0, &start);
     gpio_set_level(GPIO_OUTPUT, 1);
     for (k = 0; k < REP; k++)
-      fft_execute(fft_synthesis);
+      esp32_fft_execute(fft_synthesis);
     gpio_set_level(GPIO_OUTPUT, 0);
     timer_get_counter_time_sec(TIMER_GROUP_0, TIMER_0, &end);
     printf("iFFT size=%d runtime=%f ms\n", NFFT, 1000 * (end - start) / REP);
 
-    fft_destroy(fft_analysis);
-    fft_destroy(fft_synthesis);
+    esp32_fft_destroy(fft_analysis);
+    esp32_fft_destroy(fft_synthesis);
   }
 }
 
@@ -156,18 +157,18 @@ void rfft_test_task() {
     int NFFT = 1 << n;
 
     // Create fft plan and let it allocate arrays
-    fft_config_t *fft_analysis =
-        fft_init(NFFT, FFT_REAL, FFT_FORWARD, NULL, NULL);
-    fft_config_t *fft_synthesis =
-        fft_init(NFFT, FFT_REAL, FFT_BACKWARD, fft_analysis->output, NULL);
+    esp32_fft_config_t *fft_analysis =
+        esp32_fft_init(NFFT, ESP32_FFT_REAL, ESP32_FFT_FORWARD, NULL, NULL);
+    esp32_fft_config_t *fft_synthesis = esp32_fft_init(
+        NFFT, ESP32_FFT_REAL, ESP32_FFT_BACKWARD, fft_analysis->output, NULL);
 
     // Fill array with some dummy data
     for (k = 0; k < fft_analysis->size; k++)
       fft_analysis->input[k] = (float)k / (float)fft_analysis->size;
 
     // Test accuracy
-    fft_execute(fft_analysis);
-    fft_execute(fft_synthesis);
+    esp32_fft_execute(fft_analysis);
+    esp32_fft_execute(fft_synthesis);
 
     int n_errors = 0;
     for (k = 0; k < fft_analysis->size; k++)
@@ -184,7 +185,7 @@ void rfft_test_task() {
     timer_get_counter_time_sec(TIMER_GROUP_0, TIMER_0, &start);
     gpio_set_level(GPIO_OUTPUT, 1);
     for (k = 0; k < REP; k++)
-      fft_execute(fft_analysis);
+      esp32_fft_execute(fft_analysis);
     gpio_set_level(GPIO_OUTPUT, 0);
     timer_get_counter_time_sec(TIMER_GROUP_0, TIMER_0, &end);
     printf(" Real FFT size=%d runtime=%f ms\n", NFFT,
@@ -195,14 +196,14 @@ void rfft_test_task() {
     timer_get_counter_time_sec(TIMER_GROUP_0, TIMER_0, &start);
     gpio_set_level(GPIO_OUTPUT, 1);
     for (k = 0; k < REP; k++)
-      fft_execute(fft_synthesis);
+      esp32_fft_execute(fft_synthesis);
     gpio_set_level(GPIO_OUTPUT, 0);
     timer_get_counter_time_sec(TIMER_GROUP_0, TIMER_0, &end);
     printf("Real iFFT size=%d runtime=%f ms\n", NFFT,
            1000 * (end - start) / REP);
 
-    fft_destroy(fft_analysis);
-    fft_destroy(fft_synthesis);
+    esp32_fft_destroy(fft_analysis);
+    esp32_fft_destroy(fft_synthesis);
   }
 }
 
