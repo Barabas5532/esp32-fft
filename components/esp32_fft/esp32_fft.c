@@ -305,8 +305,8 @@ void esp32_fft_fft_primitive(float *x, float *y, int n, int stride,
   if (n == 8) {
     esp32_fft_fft8(x, stride, y, 2);
     return;
-  }
-#else
+  } else
+#endif
   // End condition, stop at n=2 to avoid one trivial recursion
   if (n == 2) {
     y[0] = x[0] + x[stride];
@@ -315,7 +315,6 @@ void esp32_fft_fft_primitive(float *x, float *y, int n, int stride,
     y[3] = x[1] - x[stride + 1];
     return;
   }
-#endif
 
   // Recursion -- Decimation In Time algorithm
   esp32_fft_fft_primitive(x, y, n / 2, 2 * stride, twiddle_factors,
@@ -392,8 +391,8 @@ void esp32_fft_split_radix_fft(float *x, float *y, int n, int stride,
   } else if (n == 4) {
     esp32_fft_fft4(x, stride, y, 2);
     return;
-  }
-#else
+  } else
+#endif
   // End condition, stop at n=2 to avoid one trivial recursion
   if (n == 2) {
     y[0] = x[0] + x[stride];
@@ -406,7 +405,6 @@ void esp32_fft_split_radix_fft(float *x, float *y, int n, int stride,
     y[1] = x[1];
     return;
   }
-#endif
 
   // Recursion -- Decimation In Time algorithm
   esp32_fft_split_radix_fft(x, y, n / 2, 2 * stride, twiddle_factors,
